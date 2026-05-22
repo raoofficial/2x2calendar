@@ -1,0 +1,379 @@
+:root {
+  --bg: #0b1020;
+
+  --surface: #121a2b;
+
+  --surface-light: #1a2438;
+
+  --text: #f3f4f6;
+
+  --muted: #8b93a7;
+
+  --work: #ff7849;
+
+  --off: #4fb286;
+
+  --today: #4285ff;
+
+  --border: rgba(255, 255, 255, 0.06);
+
+  --radius: 22px;
+
+  --transition:
+    160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  margin: 0;
+
+  padding: 0;
+
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+
+  min-height: 100vh;
+
+  background:
+    radial-gradient(
+      circle at top,
+      #101a33 0%,
+      #0b1020 45%,
+      #080c18 100%
+    );
+
+  color: var(--text);
+
+  font-family:
+    Inter,
+    system-ui,
+    sans-serif;
+
+  overflow-x: hidden;
+}
+
+body {
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  padding: 40px;
+}
+
+.app {
+  width: 100%;
+
+  max-width: 460px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 20px;
+}
+
+.topbar {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+}
+
+.title {
+  font-size: 34px;
+
+  font-weight: 700;
+
+  letter-spacing: -0.04em;
+}
+
+.subtitle {
+  margin-top: 4px;
+
+  color: var(--muted);
+
+  font-size: 14px;
+}
+
+.today-btn {
+  border: 1px solid var(--border);
+
+  background:
+    rgba(255, 255, 255, 0.04);
+
+  backdrop-filter: blur(10px);
+
+  color: var(--text);
+
+  padding: 12px 18px;
+
+  border-radius: 16px;
+
+  cursor: pointer;
+
+  transition: var(--transition);
+}
+
+.today-btn:hover {
+  background:
+    rgba(255, 255, 255, 0.08);
+
+  transform: translateY(-2px);
+}
+
+.controls {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+.month-nav {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+}
+
+.month-label {
+  font-size: 30px;
+
+  font-weight: 700;
+
+  text-transform: capitalize;
+}
+
+.nav-btn {
+  width: 46px;
+
+  height: 46px;
+
+  border: none;
+
+  border-radius: 16px;
+
+  background:
+    rgba(255, 255, 255, 0.04);
+
+  color: var(--text);
+
+  cursor: pointer;
+
+  transition: var(--transition);
+}
+
+.nav-btn:hover {
+  background:
+    rgba(255, 255, 255, 0.08);
+
+  transform: translateY(-2px);
+}
+
+.settings {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 14px;
+}
+
+.setting-group {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.setting-group label {
+  color: var(--muted);
+
+  font-size: 13px;
+}
+
+.setting-group input,
+.setting-group select {
+  width: 100%;
+
+  height: 52px;
+
+  background:
+    rgba(255, 255, 255, 0.04);
+
+  border: 1px solid var(--border);
+
+  border-radius: 16px;
+
+  color: var(--text);
+
+  padding: 0 14px;
+
+  outline: none;
+
+  transition: var(--transition);
+}
+
+.setting-group input:focus,
+.setting-group select:focus {
+  border-color: var(--today);
+}
+
+.stats {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 14px;
+}
+
+.stat-card {
+  background:
+    rgba(255, 255, 255, 0.04);
+
+  border: 1px solid var(--border);
+
+  border-radius: 24px;
+
+  padding: 20px;
+}
+
+.stat-label {
+  display: block;
+
+  color: var(--muted);
+
+  margin-bottom: 12px;
+
+  font-size: 13px;
+}
+
+.stat-value {
+  font-size: 40px;
+
+  font-weight: 700;
+}
+
+.calendar-wrapper {
+  background:
+    rgba(255, 255, 255, 0.04);
+
+  border: 1px solid var(--border);
+
+  border-radius: 30px;
+
+  padding: 20px;
+
+  backdrop-filter: blur(12px);
+}
+
+.weekdays {
+  display: grid;
+
+  grid-template-columns: repeat(7, 1fr);
+
+  margin-bottom: 12px;
+}
+
+.weekdays div {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color: var(--muted);
+
+  font-size: 12px;
+}
+
+.calendar {
+  display: grid;
+
+  grid-template-columns: repeat(7, 1fr);
+
+  gap: 10px;
+}
+
+.day {
+  aspect-ratio: 1;
+
+  border-radius: 16px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+  transition: var(--transition);
+}
+
+.day:hover {
+  transform: translateY(-2px);
+}
+
+.day.empty {
+  background: transparent;
+}
+
+.day.work {
+  background:
+    rgba(255, 120, 73, 0.16);
+
+  color: var(--work);
+}
+
+.day.off {
+  background:
+    rgba(79, 178, 134, 0.16);
+
+  color: var(--off);
+}
+
+.day.today {
+  outline: 2px solid var(--today);
+
+  outline-offset: -2px;
+}
+
+.fade-in {
+  animation: fade 160ms ease;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 600px) {
+
+  body {
+    padding: 20px;
+  }
+
+  .app {
+    max-width: 100%;
+  }
+
+}
