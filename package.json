@@ -1,0 +1,19 @@
+{
+  "name": "2x2-calendar",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "PWA-календарь для графика 2 через 2.",
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "lint": "node --check app.js && node --check utils/calendar.js && node --check sw.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "calendar",
+    "pwa",
+    "schedule",
+    "2x2"
+  ],
+  "license": "MIT"
+}
