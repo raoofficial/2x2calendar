@@ -1,278 +1,225 @@
 import {
   calculateDayType,
+  formatInputDate,
   generateCalendarMatrix,
-  isToday
+  isToday,
+  normalizeDate,
+  parseDateInputValue
 } from "./utils/calendar.js";
 
-const STORAGE_KEY =
-  "twoByTwoSchedule";
-
-const calendarEl =
-  document.getElementById("calendar");
-
-const monthLabelEl =
-  document.getElementById("monthLabel");
-
-const workCountEl =
-  document.getElementById("workCount");
-
-const offCountEl =
-  document.getElementById("offCount");
-
-const startDateInput =
-  document.getElementById("startDate");
-
-const startTypeSelect =
-  document.getElementById("startType");
-
-const prevMonthBtn =
-  document.getElementById("prevMonth");
-
-const nextMonthBtn =
-  document.getElementById("nextMonth");
-
-const todayBtn =
-  document.getElementById("todayBtn");
-
-let currentDate = new Date();
-
-let settings = {
-  startDate: new Date(),
-  startType: "work"
+const STORAGE_KEY = "twoByTwoSchedule:v2";
+const LEGACY_STORAGE_KEY = "twoByTwoSchedule";
+const VALID_DAY_TYPES = new Set(["work", "off"]);
+const DAY_TYPE_LABELS = {
+  work: "рабочий день",
+  off: "выходной день"
 };
 
+const elements = {
+  calendar: getRequiredElement("calendar"),
+  monthLabel: getRequiredElement("monthLabel"),
+  workCount: getRequiredElement("workCount"),
+  offCount: getRequiredElement("offCount"),
+  startDate: getRequiredElement("startDate"),
+  startType: getRequiredElement("startType"),
+  prevMonth: getRequiredElement("prevMonth"),
+  nextMonth: getRequiredElement("nextMonth"),
+  today: getRequiredElement("todayBtn"),
+  status: getRequiredElement("status")
+};
+
+let currentDate = normalizeDate(new Date());
+let settings = createDefaultSettings();
+
+function getRequiredElement(id) {
+  const element = document.getElementById(id);
+
+  if (!element) {
+    throw new Error(`Element #${id} not found`);
+  }
+
+  return element;
+}
+
+function createDefaultSettings() {
+  return {
+    startDate: formatInputDate(new Date()),
+    startType: "work"
+  };
+}
+
+function normalizeSettings(value) {
+  const fallback = createDefaultSettings();
+  const startDate = parseDateInputValue(value?.startDate) ? value.startDate : fallback.startDate;
+  const startType = VALID_DAY_TYPES.has(value?.startType) ? value.startType : fallback.startType;
+
+  return {
+    startDate,
+    startType
+  };
+}
+
+function migrateLegacySettings() {
+  const legacySettings = localStorage.getItem(LEGACY_STORAGE_KEY);
+
+  if (!legacySettings || localStorage.getItem(STORAGE_KEY)) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(legacySettings);
+    const storedDate = typeof parsed.startDate === "string" ? parsed.startDate.slice(0, 10) : null;
+    const legacyDate = storedDate && parseDateInputValue(storedDate)
+      ? storedDate
+      : formatInputDate(new Date(parsed.startDate));
+
+    if (!parseDateInputValue(legacyDate)) {
+      return null;
+    }
+
+    return normalizeSettings({
+      startDate: legacyDate,
+      startType: parsed.startType
+    });
+  } catch {
+    return null;
+  }
+}
+
 function saveSettings() {
-
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify({
-      startDate:
-        settings.startDate.toISOString(),
-
-      startType:
-        settings.startType
-    })
-  );
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
 }
 
 function loadSettings() {
+  try {
+    const storedSettings = localStorage.getItem(STORAGE_KEY);
+    const parsedSettings = storedSettings ? JSON.parse(storedSettings) : migrateLegacySettings();
 
-  const data =
-    localStorage.getItem(
-      STORAGE_KEY
-    );
-
-  if (data) {
-
-    const parsed =
-      JSON.parse(data);
-
-    settings = {
-      ...parsed,
-      startDate:
-        new Date(parsed.startDate)
-    };
-
+    settings = normalizeSettings(parsedSettings);
+    saveSettings();
+  } catch {
+    settings = createDefaultSettings();
+    localStorage.removeItem(STORAGE_KEY);
   }
 
   syncInputs();
-
   renderCalendar();
 }
 
 function syncInputs() {
-
-  startDateInput.value =
-    formatInputDate(
-      settings.startDate
-    );
-
-  startTypeSelect.value =
-    settings.startType;
-}
-
-function formatInputDate(date) {
-
-  const year =
-    date.getFullYear();
-
-  const month =
-    String(
-      date.getMonth() + 1
-    ).padStart(2, "0");
-
-  const day =
-    String(
-      date.getDate()
-    ).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
+  elements.startDate.value = settings.startDate;
+  elements.startType.value = settings.startType;
 }
 
 function getMonthName(date) {
+  return date.toLocaleDateString("ru-RU", {
+    month: "long",
+    year: "numeric"
+  });
+}
 
-  return date.toLocaleDateString(
-    "ru-RU",
-    {
-      month: "long",
-      year: "numeric"
-    }
-  );
+function getFullDateLabel(date) {
+  return date.toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    weekday: "long"
+  });
 }
 
 function renderCalendar() {
-
-  const year =
-    currentDate.getFullYear();
-
-  const month =
-    currentDate.getMonth();
-
-  const matrix =
-    generateCalendarMatrix(
-      year,
-      month
-    );
-
-  monthLabelEl.textContent =
-    getMonthName(currentDate);
-
-  const fragment =
-    document.createDocumentFragment();
-
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const monthName = getMonthName(currentDate);
+  const startDate = parseDateInputValue(settings.startDate) ?? normalizeDate(new Date());
+  const matrix = generateCalendarMatrix(year, month);
+  const fragment = document.createDocumentFragment();
   let workCount = 0;
-
   let offCount = 0;
 
-  matrix.forEach((date) => {
+  elements.monthLabel.textContent = monthName;
+  elements.calendar.setAttribute("aria-label", `Календарь на ${monthName}`);
 
-    const cell =
-      document.createElement("div");
-
-    cell.className =
-      "day fade-in";
-
+  for (const date of matrix) {
     if (!date) {
-
-      cell.classList.add("empty");
-
-      fragment.appendChild(cell);
-
-      return;
+      const emptyCell = document.createElement("div");
+      emptyCell.className = "day empty";
+      emptyCell.setAttribute("aria-hidden", "true");
+      fragment.appendChild(emptyCell);
+      continue;
     }
 
-    const type =
-      calculateDayType(
-        date,
-        settings.startDate,
-        settings.startType
-      );
+    const dayType = calculateDayType(date, startDate, settings.startType);
+    const dayLabel = DAY_TYPE_LABELS[dayType];
+    const dateLabel = getFullDateLabel(date);
+    const dateKey = formatInputDate(date);
+    const cell = document.createElement("time");
 
-    cell.classList.add(type);
+    cell.className = `day fade-in ${dayType}`;
+    cell.dateTime = dateKey;
+    cell.textContent = String(date.getDate());
+    cell.title = `${dateLabel}: ${dayLabel}`;
+    cell.setAttribute("role", "gridcell");
+    cell.setAttribute("aria-label", `${dateLabel}, ${dayLabel}`);
 
     if (isToday(date)) {
       cell.classList.add("today");
+      cell.setAttribute("aria-current", "date");
     }
 
-    if (type === "work") {
-      workCount++;
+    if (dayType === "work") {
+      workCount += 1;
     } else {
-      offCount++;
+      offCount += 1;
     }
-
-    cell.textContent =
-      date.getDate();
 
     fragment.appendChild(cell);
+  }
 
-  });
-
-  calendarEl.replaceChildren(
-    fragment
-  );
-
-  workCountEl.textContent =
-    workCount;
-
-  offCountEl.textContent =
-    offCount;
+  elements.calendar.replaceChildren(fragment);
+  elements.workCount.textContent = String(workCount);
+  elements.offCount.textContent = String(offCount);
+  elements.status.textContent = `${monthName}: рабочих дней — ${workCount}, выходных — ${offCount}.`;
 }
 
 function updateSchedule() {
+  const selectedDate = parseDateInputValue(elements.startDate.value);
+  const selectedType = elements.startType.value;
 
-  settings.startDate =
-    new Date(
-      startDateInput.value
-    );
+  if (!selectedDate || !VALID_DAY_TYPES.has(selectedType)) {
+    syncInputs();
+    return;
+  }
 
-  settings.startType =
-    startTypeSelect.value;
+  settings = {
+    startDate: formatInputDate(selectedDate),
+    startType: selectedType
+  };
 
   saveSettings();
-
   renderCalendar();
 }
 
-prevMonthBtn.addEventListener(
-  "click",
-  () => {
+function changeMonth(offset) {
+  currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + offset, 1);
+  renderCalendar();
+}
 
-    currentDate =
-      new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth() - 1,
-        1
-      );
+elements.prevMonth.addEventListener("click", () => changeMonth(-1));
+elements.nextMonth.addEventListener("click", () => changeMonth(1));
+elements.today.addEventListener("click", () => {
+  currentDate = normalizeDate(new Date());
+  renderCalendar();
+});
+elements.startDate.addEventListener("change", updateSchedule);
+elements.startType.addEventListener("change", updateSchedule);
 
-    renderCalendar();
-
-  }
-);
-
-nextMonthBtn.addEventListener(
-  "click",
-  () => {
-
-    currentDate =
-      new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth() + 1,
-        1
-      );
-
-    renderCalendar();
-
-  }
-);
-
-todayBtn.addEventListener(
-  "click",
-  () => {
-
-    currentDate =
-      new Date();
-
-    renderCalendar();
-
-  }
-);
-
-startDateInput.addEventListener(
-  "change",
-  updateSchedule
-);
-
-startTypeSelect.addEventListener(
-  "change",
-  updateSchedule
-);
-
-if ("serviceWorker" in navigator) {
-
-  navigator.serviceWorker.register(
-    "./sw.js"
-  );
-
+if ("serviceWorker" in navigator && window.location.protocol !== "file:") {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch((error) => {
+      console.warn("Service worker registration failed", error);
+    });
+  });
 }
 
 loadSettings();
