@@ -1,168 +1,81 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-
   <meta charset="UTF-8" />
-
-  <meta
-    name="viewport"
-    content="
-      width=device-width,
-      initial-scale=1.0,
-      viewport-fit=cover
-    "
-  />
-
-  <meta
-    name="theme-color"
-    content="#0b1020"
-  />
-
-  <title>
-    Календарь 2×2
-  </title>
-
-  <link
-    rel="manifest"
-    href="manifest.webmanifest"
-  />
-
-  <link
-    rel="stylesheet"
-    href="styles.css"
-  />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="PWA-календарь для графика работы 2 через 2 с подсчётом рабочих и выходных дней." />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="2×2" />
+  <title>Календарь 2×2</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
-
-  <main class="app">
-
+  <main class="app" aria-labelledby="appTitle">
     <header class="topbar">
-
       <div>
-
-        <h1 class="title">
-          Календарь
-        </h1>
-
-        <p class="subtitle">
-          График 2 через 2
-        </p>
-
+        <h1 id="appTitle" class="title">Календарь</h1>
+        <p class="subtitle">График 2 через 2</p>
       </div>
 
-      <button
-        id="todayBtn"
-        class="today-btn"
-      >
+      <button id="todayBtn" class="today-btn" type="button">
         Сегодня
       </button>
-
     </header>
 
-    <section class="controls">
-
+    <section class="controls" aria-label="Настройки календаря">
       <div class="month-nav">
-
-        <button
-          id="prevMonth"
-          class="nav-btn"
-        >
+        <button id="prevMonth" class="nav-btn" type="button" aria-label="Предыдущий месяц">
           ←
         </button>
 
-        <div
-          id="monthLabel"
-          class="month-label"
-        ></div>
+        <h2 id="monthLabel" class="month-label" aria-live="polite"></h2>
 
-        <button
-          id="nextMonth"
-          class="nav-btn"
-        >
+        <button id="nextMonth" class="nav-btn" type="button" aria-label="Следующий месяц">
           →
         </button>
-
       </div>
 
       <div class="settings">
-
         <div class="setting-group">
-
-          <label for="startDate">
-            Стартовая дата
-          </label>
-
-          <input
-            type="date"
-            id="startDate"
-          />
-
+          <label for="startDate">Стартовая дата</label>
+          <input type="date" id="startDate" autocomplete="off" />
         </div>
 
         <div class="setting-group">
-
-          <label for="startType">
-            Тип дня
-          </label>
-
+          <label for="startType">Тип дня</label>
           <select id="startType">
-
-            <option value="work">
-              Работа
-            </option>
-
-            <option value="off">
-              Выходной
-            </option>
-
+            <option value="work">Работа</option>
+            <option value="off">Выходной</option>
           </select>
-
         </div>
-
       </div>
-
     </section>
 
-    <section class="stats">
-
-      <div class="stat-card">
-
-        <span class="stat-label">
-          Рабочих
-        </span>
-
-        <span
-          id="workCount"
-          class="stat-value"
-        >
-          0
-        </span>
-
+    <section class="stats" aria-label="Статистика месяца">
+      <div class="stat-card work-stat">
+        <span class="stat-label">Рабочих</span>
+        <span id="workCount" class="stat-value">0</span>
       </div>
 
-      <div class="stat-card">
-
-        <span class="stat-label">
-          Выходных
-        </span>
-
-        <span
-          id="offCount"
-          class="stat-value"
-        >
-          0
-        </span>
-
+      <div class="stat-card off-stat">
+        <span class="stat-label">Выходных</span>
+        <span id="offCount" class="stat-value">0</span>
       </div>
-
     </section>
 
-    <section class="calendar-wrapper">
+    <section class="calendar-wrapper" aria-label="Календарная сетка">
+      <div class="legend" aria-label="Обозначения">
+        <span><i class="legend-dot work-dot" aria-hidden="true"></i> Работа</span>
+        <span><i class="legend-dot off-dot" aria-hidden="true"></i> Выходной</span>
+        <span><i class="legend-ring" aria-hidden="true"></i> Сегодня</span>
+      </div>
 
-      <div class="weekdays">
-
+      <div class="weekdays" aria-hidden="true">
         <div>Пн</div>
         <div>Вт</div>
         <div>Ср</div>
@@ -170,22 +83,13 @@
         <div>Пт</div>
         <div>Сб</div>
         <div>Вс</div>
-
       </div>
 
-      <div
-        id="calendar"
-        class="calendar"
-      ></div>
-
+      <div id="calendar" class="calendar" role="grid"></div>
+      <p id="status" class="sr-only" aria-live="polite"></p>
     </section>
-
   </main>
 
-  <script
-    type="module"
-    src="app.js"
-  ></script>
-
+  <script type="module" src="app.js"></script>
 </body>
 </html>
