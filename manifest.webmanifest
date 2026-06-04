@@ -1,28 +1,29 @@
 {
+  "id": "./",
   "name": "Календарь 2×2",
-  "short_name": "2x2",
-  "description": "График работы 2 через 2",
+  "short_name": "2×2",
+  "description": "График работы 2 через 2 с подсчётом рабочих и выходных дней.",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0b1020",
   "theme_color": "#0b1020",
   "orientation": "portrait",
   "lang": "ru",
-  "scope": "./",
-
+  "categories": ["productivity", "utilities"],
   "icons": [
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
-
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
-
     {
       "src": "icons/maskable-512.png",
       "sizes": "512x512",
